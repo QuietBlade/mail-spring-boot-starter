@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: spring-mail
+  mail:
+    username: xxxxxxxxx@163.com
+    password: xxxxxxxxx
+    host: smtp.163.com
+    protocol: smtp
+    port: 25
+    test-connection: true
+    default-encoding: UTF-8
+  thymeleaf:
+    prefix: classpath:/mail-templates
+server:
+  port: 8001
