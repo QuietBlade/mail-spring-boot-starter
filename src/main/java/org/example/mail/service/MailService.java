@@ -6,6 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamSource;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.common.TemplateParserContext;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -23,7 +27,7 @@ import java.util.Map;
 /**
  * @author: world
  * @date: 2022/5/30 17:52
- * @description:
+ * @description: 发送邮件服务
  */
 @Service
 public class MailService {
@@ -90,16 +94,19 @@ public class MailService {
             throw new RuntimeException(e);
         }
         final String title = "统信平台 - " + operaName;
-        // 此模板共4个参数, 依次分别是 serverName 操作名称,username 用户名,verifyCode 验证码,datetime 发送时间
-
-        final String content = String.format(result, operaName, username, verifyCode, newDate());
+        // 此模板共4个参数, 依次分别是 operation 操作名称,username 用户名,verifyCode 验证码,datetime 发送时间
+        EvaluationContext context = new StandardEvaluationContext();
+        context.setVariable("operation",operaName);
+        context.setVariable("username",username);
+        context.setVariable("verifyCode",verifyCode);
+        context.setVariable("datetime",newDate());
+        final String content = new SpelExpressionParser().parseExpression(result, new TemplateParserContext()).getValue(context, String.class);
         // 发送验证邮件
         this.sendMimeMail(email,title,content,null);
     }
 
-    public String newDate(){
+    public String newDate() {
         final SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月dd日");
         return format.format(new Date());
     }
-
 }
